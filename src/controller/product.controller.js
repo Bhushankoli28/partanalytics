@@ -13,40 +13,40 @@ const User = require("../models/user.model");
 
 const router = express();
 
-function verifytoken(req,res,next){
+function verifytoken(req, res, next) {
     const bearerheader = req.headers["authorization"]
-    if(typeof bearerheader !== undefined){
+    if (typeof bearerheader !== undefined) {
         const bearer = bearerheader.split(" ")
         const token = bearer[1]
         req.token = token
         next()
     }
 
-    else{
-        res.send({result:"Token is not valid"})
+    else {
+        res.send({ result: "Token is not valid" })
     }
 }
 
-router.post("",verifytoken, async(req,res) => {
-    try{
+router.post("", verifytoken, async (req, res) => {
+    try {
 
-        jwt.verify(req.token,secretkey,async(err,authdata) =>{
-            if(err){
-                return res.send({result:"invalid token"})
-    
+        jwt.verify(req.token, secretkey, async (err, authdata) => {
+            if (err) {
+                return res.send({ result: "invalid token" })
+
             }
-            else{
-                 const product = await Product.create(req.body)
-                return res.send({message:"token valid",data:product})
+            else {
+                const product = await Product.create(req.body)
+                return res.send({ message: "token valid", request_id: product._id })
             }
-         })
-        
-    //  const product = await Product.create(req.body)
-    //  jwt.verify(req.token,secretkey,(err,authdata))
-    //  return res.send({Requestid:product._id})
+        })
+
+        //  const product = await Product.create(req.body)
+        //  jwt.verify(req.token,secretkey,(err,authdata))
+        //  return res.send({Requestid:product._id})
     }
 
-    catch(err){
+    catch (err) {
         return res.send(err.message)
     }
 
@@ -54,130 +54,130 @@ router.post("",verifytoken, async(req,res) => {
 
 
 
-router.get("",verifytoken, async(req,res) => {
-    try{
-        
-     const product = await Product.find()
-     
-     jwt.verify(req.token,secretkey,(err,authdata) =>{
-        if(err){
-            return res.send({result:"invalid token"})
+router.get("", verifytoken, async (req, res) => {
+    try {
 
-        }
-        else{
-            return res.send({message:"token valid",data:product})
-        }
-     })
-    //  return res.send(product)
+        const product = await Product.find()
+
+        jwt.verify(req.token, secretkey, (err, authdata) => {
+            if (err) {
+                return res.send({ result: "invalid token" })
+
+            }
+            else {
+                return res.send({ message: "token valid", data: product })
+            }
+        })
+        //  return res.send(product)
     }
 
-    catch(err){
+    catch (err) {
         return res.send(err.message)
     }
 
 })
 
 
-router.delete("/:_id",verifytoken, async(req,res) => {
-    try{
-        
-       
+router.delete("/:_id", verifytoken, async (req, res) => {
+    try {
+
+
         // const product = await Product.findById(req.params._id).lean().exec();
-       
-        jwt.verify(req.token,secretkey,async(err,authdata) =>{
-        if(err){
-            return res.send({result:"invalid token"})
 
-        }
-        else{
-            const product = await Product.findById(req.params._id)
-                
-             if(product.status == "pending"){
-               const result = await product.deleteOne()
+        jwt.verify(req.token, secretkey, async (err, authdata) => {
+            if (err) {
+                return res.send({ result: "invalid token" })
 
-               return res.send({message:"token valid",status:"Success"})
             }
-            
-        }
-     })
-    //  return res.send(product)
+            else {
+                const product = await Product.findById(req.params._id)
+
+                if (product.status == "pending") {
+                    const result = await product.deleteOne()
+
+                    return res.send({ message: "token valid", status: "Success" })
+                }
+
+            }
+        })
+        //  return res.send(product)
     }
 
-    catch(err){
+    catch (err) {
         return res.send(err.message)
     }
 
 })
 
 
-router.get("/admin",verifytoken, async(req,res) => {
-    try{
-        
-    //  const product = await Product.find()
-     
-     jwt.verify(req.token,secretkey,async(err,authdata) =>{
-        if(err){
-            return res.send({result:"invalid token"})
+router.get("/admin", verifytoken, async (req, res) => {
+    try {
 
-        }
-        else{
-             
-            const user = await User.findOne({email:authdata.data.email})
+        //  const product = await Product.find()
 
-            if(user.role === "admin"){
-
-                const product = await Product.find({status:"pending"})
-                
-                return res.send({message:"token valid",data:product})
+        jwt.verify(req.token, secretkey, async (err, authdata) => {
+            if (err) {
+                return res.send({ result: "invalid token" })
 
             }
-            else{
-                return res.send({result:"admin not found",user})
+            else {
+
+                const user = await User.findOne({ email: authdata.data.email })
+
+                if (user.role === "admin") {
+
+                    const product = await Product.find({ status: "pending" })
+
+                    return res.send({ message: "token valid", data: product })
+
+                }
+                else {
+                    return res.send({ result: "admin not found", })
+                }
+
             }
-           
-        }
-     })
-    //  return res.send(product)
+        })
+        //  return res.send(product)
     }
 
-    catch(err){
+    catch (err) {
         return res.send(err.message)
     }
 
 })
 
 
-router.put("/admin/:_id",verifytoken, async(req,res) => {
-    try{
-        
-    //  const product = await Product.find()
-     
-     jwt.verify(req.token,secretkey,async(err,authdata) =>{
-        if(err){
-            return res.send({result:"invalid token"})
+router.put("/admin/:_id", verifytoken, async (req, res) => {
+    try {
 
-        }
-        else{
-             
-            const user = await User.findOne({email:authdata.data.email})
+        //  const product = await Product.find()
 
-            if(user.role === "admin"){
-
-                const product = await Product.findByIdAndUpdate(req.params._id,req.body)
-                
-                return res.send({message:"token valid",result:"success"})
+        jwt.verify(req.token, secretkey, async (err, authdata) => {
+            if (err) {
+                return res.send({ result: "invalid token" })
 
             }
-            else{
-                return res.send({result:"admin not found",user})
+            else {
+
+                const user = await User.findOne({ email: authdata.data.email })
+
+                if (user.role === "admin") {
+
+                    const product = await Product.findByIdAndUpdate(req.params._id, req.body)
+
+                    return res.send({ message: "token valid", result: "success" })
+
+                }
+                else {
+                    return res.send({ result: "admin not found", user })
+                }
+
             }
-           
-        }
-     })
-    //  return res.send(product)
+        })
+        //  return res.send(product)
     }
 
-    catch(err){
+    catch (err) {
         return res.send(err.message)
     }
 

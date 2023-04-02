@@ -17,22 +17,22 @@ const app = express()
 
 app.use(express.json())
 
-app.use("/users",User)
-app.use("/product",Product)
+app.use("/users", User)
+app.use("/product", Product)
 
-app.get("", async(req,res) =>{
-    await res.send ("hiii")
+app.get("", async (req, res) => {
+    await res.send("hiii")
 })
 
-app.listen(port,async() =>{
-try{
-    await connect()
+app.listen(port, async () => {
+    try {
+        await connect()
 
-}
-catch(err){
+    }
+    catch (err) {
 
-    console.log(err)
-}
+        console.log(err)
+    }
 
-console.log("Server is Running")
+    console.log("Server is Running")
 })
